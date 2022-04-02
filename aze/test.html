@@ -1,0 +1,53 @@
+<html>
+<head>
+  <script>
+
+    const context = new(window.AudioContext || window.webkitAudioContext)()
+
+    async function run()
+    {
+      var myArrayBuffer = context.createBuffer(2, context.sampleRate, context.sampleRate);
+      // Fill the buffer with white noise;
+      // just random values between -1.0 and 1.0
+      for (var channel = 0; channel < myArrayBuffer.numberOfChannels; channel++) {
+        // This gives us the actual array that contains the data
+        var nowBuffering = myArrayBuffer.getChannelData(channel);
+        for (var i = 0; i < myArrayBuffer.length; i++) {
+          // audio needs to be in [-1.0; 1.0]
+          nowBuffering[i] = Math.random() * 2 - 1;
+        }
+      }
+      playAudio(myArrayBuffer)
+    }
+
+    function playAudio(buf){
+      const streamNode = context.createMediaStreamDestination();
+      const stream = streamNode.stream;
+      const recorder = new MediaRecorder( stream );
+      const chunks = [];
+      recorder.ondataavailable = evt => chunks.push( evt.data );
+      recorder.onstop = evt => exportAudio( new Blob( chunks ) );
+
+      const source = context.createBufferSource()
+      source.onended = () => recorder.stop();
+      source.buffer = buf
+      source.playbackRate.value = 0.2
+      source.connect( streamNode );
+      source.connect(context.destination);
+      source.start(0)
+      recorder.start();
+    }
+
+    function exportAudio( blob ) {
+      const aud = new Audio( URL.createObjectURL( blob ) );
+      aud.controls = true;
+      document.body.prepend( aud );
+    }
+
+
+  </script>
+</head>
+<body onload="javascript:run()">
+<input type="button" onclick="context.resume()" value="play"/>
+</body>
+</html>

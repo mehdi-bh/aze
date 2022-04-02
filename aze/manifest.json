@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+
+  "name": "aze",
+  "description": "We will help mushrooms to have hears",
+  "version": "1.0",
+
+  "action": {
+    "default_icon": "icon.png",
+    "default_popup": "basic.html"
+  },
+
+  "permissions": [
+    "activeTab"
+  ]
+}
